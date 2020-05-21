@@ -12,7 +12,7 @@ on:
     - cron: '0 3 * * *'
 
 jobs:
-  test:
+  fetch:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
