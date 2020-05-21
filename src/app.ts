@@ -106,5 +106,7 @@ import { getCategories } from './functions/getCategories'
     fs.writeFile(`dist/${category.category}.json`, JSON.stringify(category),() => {})
   })
 
+  console.log('[core]: done')
+
   return songsPerCategory
 })()
