@@ -36,6 +36,7 @@ import { getCategories } from './functions/getCategories'
       await scrollPageToBottom(page, 200, 300)
   
       console.log(`[unit/${category.id}]: parsing songs`)
+      const total = await page.$$eval('.songs > div > * > .songs-data-box > .songs-data-box-music', elements => elements.length)
       const songs = await page.$$eval('.songs > div > * > .songs-data-box > .songs-data-box-music', async elements => {
         const res = await Promise.all(
           elements.map(element => {
@@ -87,9 +88,15 @@ import { getCategories } from './functions/getCategories'
       await browser.close()
   
       console.log(`[unit/${category.id}]: done`)
+      console.log(`[unit/${category.id}]: total ${total}`)
+      console.log(`[unit/${category.id}]: parsed ${songs.length}`)
       return {
         category: category.id,
         title: category.title,
+        analysis: {
+          total,
+          parsed: songs.length,
+        },
         songs,
       }
   
