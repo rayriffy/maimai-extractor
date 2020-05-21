@@ -3,23 +3,66 @@ import fs from 'fs'
 import puppeteer from 'puppeteer'
 import scrollPageToBottom from 'puppeteer-autoscroll-down'
 
-import { getCategories } from './functions/getCategories'
-
 (async () => {
-  // First, get available generes
+  const HEADLESS = true
+  const DEVTOOLS = false
+
+  /**
+   * First, obtain metadata of how many page needs to be query.
+   */
   console.log('[core]: obtaining metadata')
-  const categories = await getCategories()
+
+  const browser = await puppeteer.launch({
+    headless: HEADLESS,
+    devtools: DEVTOOLS,
+  })
+  const page = await browser.newPage()
+
+  await page.goto(`https://maimai.sega.jp/song/`, {
+    waitUntil: 'networkidle0'
+  })
+
+  const categories = await page.$$eval('div.Search-box-categorybtn', elements => {
+    const res = elements.map(element => {
+      try {
+        const elClass = element.className
+        const elLink = element.querySelector('a')
+
+        if (elLink !== null) {
+          return {
+            id: elClass.split(' ')[1],
+            title: elLink.innerText,
+            href: elLink.getAttribute('href'),
+          }
+        } else {
+          throw 'yeet'
+        }
+      } catch {
+        return {
+          id: '#',
+          title: '#',
+          href: '#',
+        }
+      }
+    })
+
+    return res.filter(o => o.id !== '#')
+  })
+
+  await browser.close()
+
   console.log(`[core]: obtained! ${categories.length} page to query`)
 
-  // Then, get all songs data
+  /**
+   * Then, query songs in every page asynchronously
+   */
   const songsPerCategory = await Promise.all(
     categories.map(async category => {
       console.log(`[unit/${category.id}]: new tab`)
 
       const browser = await puppeteer.launch({
-        headless: true,
-        // headless: false,
-        // devtools: true,
+        headless: HEADLESS,
+        devtools: DEVTOOLS,
         defaultViewport: {
           width: 1000,
           height: 1000,
