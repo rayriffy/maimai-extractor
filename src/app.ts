@@ -38,7 +38,7 @@ import { getCategories } from './functions/getCategories'
       console.log(`[unit/${category.id}]: parsing songs`)
       const songs = await page.$$eval('.songs > div > * > .songs-data-box > .songs-data-box-music', async elements => {
         const res = await Promise.all(
-          elements.map(async element => {
+          elements.map(element => {
             const imgEl = element.querySelector('.elAsset > img')
             const titleEl = element.querySelector('.songs-data-box-music > .titleText')
             const artistEl = element.querySelector('.songs-data-box-music > .artistBox > .artistText')
@@ -78,7 +78,7 @@ import { getCategories } from './functions/getCategories'
                 }
               }
             }
-          })
+          }).filter(o => o.title !== '#')
         )
   
         return res
