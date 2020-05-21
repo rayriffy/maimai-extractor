@@ -1,0 +1,40 @@
+  
+name: Fetch
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  test:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: 'Init: Summon NodeJS'
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: "Cache: node_modules"
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-node-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-${{ env.cache-name }}-
+            ${{ runner.OS }}-node-
+      - name: 'Init: Install dependencies'
+        run: |
+          yarn install
+      - name: 'Build: Extract data'
+        run: |
+          yarn extract
+      - uses: actions/upload-artifact@v2
+        with:
+          name: data
+          path: dist/*
